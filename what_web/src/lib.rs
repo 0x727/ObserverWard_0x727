@@ -188,10 +188,7 @@ where
         where
             E: de::Error,
         {
-            let name: Vec<String> = value
-                .split_terminator('\n')
-                .map(|s| s.to_string())
-                .collect();
+            let name: Vec<String> = value.split_terminator('\n').map(String::from).collect();
             Ok(HashSet::from_iter(name))
         }
         fn visit_seq<S>(self, visitor: S) -> Result<Self::Value, S::Error>

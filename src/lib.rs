@@ -489,7 +489,7 @@ pub async fn get_plugins_by_nuclei(w: WhatWebResult, config: &ObserverWardConfig
     if let Ok(template_output) = String::from_utf8(output.stdout) {
         let templates_output: Vec<String> = template_output
             .split_terminator('\n')
-            .map(|s| s.to_string())
+            .map(String::from)
             .collect();
         for line in templates_output.iter() {
             let template: TemplateResult = serde_json::from_str(line).unwrap_or_default();
@@ -676,9 +676,9 @@ impl ObserverWard {
 
 // 去重
 pub fn strings_to_urls(domains: String) -> HashSet<String> {
-    let target_list: Vec<String> = domains
+    let target_list = domains
         .split_terminator('\n')
-        .map(|s| s.to_string())
-        .collect();
+        .map(String::from)
+        .collect::<Vec<_>>();
     HashSet::from_iter(target_list)
 }
