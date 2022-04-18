@@ -1,13 +1,13 @@
 #[cfg(not(target_os = "windows"))]
 extern crate daemonize;
 
+use crate::error::Error;
 use crate::{print_color, Helper, ObserverWard, ObserverWardConfig, OBSERVER_WARD_PATH};
 use actix_web::web::Data;
 use actix_web::{get, middleware, post, web, App, HttpResponse, HttpServer, Responder};
 use actix_web_httpauth::extractors::bearer::{BearerAuth, Config};
 #[cfg(not(target_os = "windows"))]
 use daemonize::Daemonize;
-use openssl::error::ErrorStack;
 use openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 use std::collections::{HashMap, HashSet};
 #[cfg(not(target_os = "windows"))]
@@ -17,7 +17,7 @@ use std::str::FromStr;
 use std::thread;
 use tokio::sync::RwLock;
 
-fn get_ssl_config() -> Result<SslAcceptorBuilder, ErrorStack> {
+fn get_ssl_config() -> Result<SslAcceptorBuilder, Error> {
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
     let key_path = OBSERVER_WARD_PATH.join("key.pem");
     let cert_path = OBSERVER_WARD_PATH.join("cert.pem");

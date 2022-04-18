@@ -20,7 +20,7 @@
 ```bash
 git clone https://github.com/0x727/ObserverWard
 cd ObserverWard
-cargo build --target  x86_64-unknown-linux-musl --release --all-features
+cargo build -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --target x86_64-unknown-linux-musl --release --all-features
 ```
 
 - 更多安装细节请查看当前项目的Actions自动化编译构建流程[文件](https://github.com/0x727/ObserverWard/blob/main/.github/workflows/basic.yml)。

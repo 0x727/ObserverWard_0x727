@@ -3,13 +3,21 @@ use std::io::{self, Read};
 
 use observer_ward::api::run_server;
 use observer_ward::cli::ObserverWardConfig;
+use observer_ward::error::Error;
 use observer_ward::{
     print_opening, print_results_and_save, read_file_to_target, strings_to_urls, Helper,
     ObserverWard,
 };
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() {
+    match start().await {
+        Ok(_) => {}
+        Err(e) => println!("{}", e),
+    }
+}
+
+async fn start() -> Result<(), Error> {
     let config = ObserverWardConfig::new();
     if !config.stdin {
         print_opening();

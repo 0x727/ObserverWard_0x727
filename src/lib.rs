@@ -1,8 +1,10 @@
+#![feature(once_cell)]
+
 use crate::cli::ObserverWardConfig;
+use error::Error;
 use futures::channel::mpsc::unbounded;
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
-use lazy_static::lazy_static;
 use observer_ward_what_server::{NmapFingerPrint, WhatServer};
 use observer_ward_what_web::fingerprint::WebFingerPrint;
 use observer_ward_what_web::{RequestOption, TemplateResult, WhatWeb, WhatWebResult};
@@ -17,6 +19,7 @@ use std::io;
 use std::io::Cursor;
 use std::io::{BufRead, Read};
 use std::iter::FromIterator;
+use std::lazy::SyncLazy;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use term::color::Color;
@@ -24,6 +27,7 @@ use tokio::process::Command;
 
 pub mod api;
 pub mod cli;
+pub mod error;
 
 use serde::{Deserialize, Serialize};
 
@@ -133,22 +137,22 @@ pub struct Helper {
     config: ObserverWardConfig,
     msg: HashMap<String, String>,
 }
-lazy_static! {
-    static ref OBSERVER_WARD_PATH: PathBuf = {
-        let mut config_path = PathBuf::new();
-        if let Some(cp) = dirs::config_dir() {
-            config_path = cp;
-        } else {
-            println!("Cannot create config directory{:?}", config_path);
-            std::process::exit(0);
-        }
-        let observer_ward = config_path.join("observer_ward");
-        if !observer_ward.is_dir() || !observer_ward.exists() {
-            std::fs::create_dir_all(&observer_ward).unwrap_or_default();
-        }
-        observer_ward
-    };
-}
+
+static OBSERVER_WARD_PATH: SyncLazy<PathBuf> = SyncLazy::new(|| -> PathBuf {
+    let mut config_path = PathBuf::new();
+    if let Some(cp) = dirs::config_dir() {
+        config_path = cp;
+    } else {
+        println!("Cannot create config directory{:?}", config_path);
+        std::process::exit(0);
+    }
+    let observer_ward = config_path.join("observer_ward");
+    if !observer_ward.is_dir() || !observer_ward.exists() {
+        std::fs::create_dir_all(&observer_ward).unwrap_or_default();
+    }
+    observer_ward
+});
+
 impl Helper {
     pub fn new(config: &ObserverWardConfig) -> Self {
         let ro = RequestOption::new(&config.timeout, &config.proxy);
@@ -252,7 +256,7 @@ impl Helper {
 
     pub fn read_web_fingerprint(&mut self, verify: &str) -> Vec<WebFingerPrint> {
         if !verify.is_empty() {
-            if let Ok(mut file) = File::open(verify.to_string()) {
+            if let Ok(mut file) = File::open(verify) {
                 let mut data = String::new();
                 file.read_to_string(&mut data).ok();
                 let mut web_fingerprint: Vec<WebFingerPrint> = vec![];
@@ -439,7 +443,7 @@ pub fn print_results_and_save(
     }
 }
 
-fn extract_plugins_zip(f_name: &Path, extract_target_path: &Path) -> Result<(), std::io::Error> {
+fn extract_plugins_zip(f_name: &Path, extract_target_path: &Path) -> Result<(), Error> {
     let plugins_path = extract_target_path.join("plugins");
     if plugins_path.exists() {
         std::fs::remove_dir_all(plugins_path)?;

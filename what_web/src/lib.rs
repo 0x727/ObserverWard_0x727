@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate lazy_static;
+#![feature(once_cell)]
 
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;

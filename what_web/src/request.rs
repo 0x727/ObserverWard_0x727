@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::lazy::SyncLazy;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -56,10 +57,11 @@ async fn send_requests(
         .send()
         .await?);
 }
-lazy_static! {
-    static ref RE_COMPILE_BY_CHARSET: Regex =
-        Regex::new(r#"(?im)charset="(.*?)"|charset=(.*?)""#).expect("RE_COMPILE_BY_CHARSET");
-}
+
+static RE_COMPILE_BY_CHARSET: SyncLazy<Regex> = SyncLazy::new(|| -> Regex {
+    Regex::new(r#"(?im)charset="(.*?)"|charset=(.*?)""#).expect("RE_COMPILE_BY_CHARSET")
+});
+
 fn get_default_encoding(byte: &[u8], headers: HeaderMap) -> String {
     let (html, _, _) = UTF_8.decode(byte);
     let mut default_encoding = "utf-8";
@@ -201,35 +203,33 @@ async fn find_favicon_tag(
     link_tags
 }
 // 支持部分正文跳转
-lazy_static! {
-    static ref RE_COMPILE_BY_JUMP: Vec<Regex> = {
-        let js_reg = vec![
-            r#"(?im)[ |.|:]location\.href.*?=.*?['|"](?P<name>.*?)['|"]"#,
-            r#"(?im)window.*?\.open\(['|"](?P<name>.*?)['|"]"#,
-            r#"(?im)window.*?\.location=['|"](?P<name>.*?)['|"]"#,
-            r#"(?im)<meta.*?http-equiv=.*?refresh.*?url=(?P<name>.*?)['|"]/?>"#,
-        ];
-        let re_list: Vec<Regex> = js_reg
-            .iter()
-            .map(|reg| Regex::new(reg).expect("RE_COMPILE_BY_JUMP"))
-            .collect();
-        re_list
-    };
-}
-lazy_static! {
-    static ref RE_COMPILE_BY_ICON: Vec<Regex> = {
-        let js_reg = vec![r#"(?im)<link rel=.*?icon.*?href=.*?(?P<name>.*?)['"/]{0,1}>"#];
-        let re_list: Vec<Regex> = js_reg
-            .iter()
-            .map(|reg| Regex::new(reg).expect("compiled regular expression"))
-            .collect();
-        re_list
-    };
-}
-lazy_static! {
-    static ref RE_COMPILE_BY_TITLE: Regex =
-        Regex::new(r#"(?im)<title>(?P<name>.*?)</title>"#).expect("compiled regular expression");
-}
+static RE_COMPILE_BY_JUMP: SyncLazy<Vec<Regex>> = SyncLazy::new(|| -> Vec<Regex> {
+    let js_reg = vec![
+        r#"(?im)[ |.|:]location\.href.*?=.*?['|"](?P<name>.*?)['|"]"#,
+        r#"(?im)window.*?\.open\(['|"](?P<name>.*?)['|"]"#,
+        r#"(?im)window.*?\.location=['|"](?P<name>.*?)['|"]"#,
+        r#"(?im)<meta.*?http-equiv=.*?refresh.*?url=(?P<name>.*?)['|"]/?>"#,
+    ];
+    let re_list: Vec<Regex> = js_reg
+        .iter()
+        .map(|reg| Regex::new(reg).expect("RE_COMPILE_BY_JUMP"))
+        .collect();
+    re_list
+});
+
+static RE_COMPILE_BY_ICON: SyncLazy<Vec<Regex>> = SyncLazy::new(|| -> Vec<Regex> {
+    let js_reg = vec![r#"(?im)<link rel=.*?icon.*?href=.*?(?P<name>.*?)['"/]{0,1}>"#];
+    let re_list: Vec<Regex> = js_reg
+        .iter()
+        .map(|reg| Regex::new(reg).expect("compiled regular expression"))
+        .collect();
+    re_list
+});
+
+static RE_COMPILE_BY_TITLE: SyncLazy<Regex> = SyncLazy::new(|| -> Regex {
+    Regex::new(r#"(?im)<title>(?P<name>.*?)</title>"#).expect("compiled regular expression")
+});
+
 pub fn get_title(raw_data: &Arc<RawData>) -> String {
     if let Some(charset) = RE_COMPILE_BY_TITLE.captures_iter(&raw_data.text).next() {
         let title = charset.name("name").map_or("", |m| m.as_str());

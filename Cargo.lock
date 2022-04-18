@@ -1548,7 +1548,6 @@ dependencies = [
  "dirs 4.0.0",
  "env_logger",
  "futures 0.3.21",
- "lazy_static",
  "log",
  "openssl",
  "prettytable-rs",
@@ -2732,7 +2731,6 @@ name = "what_server"
 version = "0.1.0"
 dependencies = [
  "futures 0.3.21",
- "lazy_static",
  "regex",
  "serde",
  "serde_derive",
@@ -2751,7 +2749,6 @@ dependencies = [
  "cached",
  "encoding_rs",
  "futures 0.3.21",
- "lazy_static",
  "md-5",
  "mime",
  "openssl",

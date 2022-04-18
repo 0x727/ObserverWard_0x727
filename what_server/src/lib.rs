@@ -1,11 +1,11 @@
-#[macro_use]
-extern crate lazy_static;
+#![feature(once_cell)]
 
 use std::collections::HashSet;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::io::{BufRead, Write};
+use std::lazy::SyncLazy;
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -189,8 +189,9 @@ impl WhatServer {
     }
 }
 
-lazy_static! {
-    static ref NMAP_FINGERPRINT_LIB_DATA: Vec<NmapFingerPrint> = {
+#[allow(dead_code)]
+static NMAP_FINGERPRINT_LIB_DATA: SyncLazy<Vec<NmapFingerPrint>> =
+    SyncLazy::new(|| -> Vec<NmapFingerPrint> {
         let self_path: PathBuf = env::current_exe().unwrap_or_default();
         let path = Path::new(&self_path)
             .parent()
@@ -206,5 +207,4 @@ lazy_static! {
         file.read_to_string(&mut data).ok();
         let nmap_fingerprint: Vec<NmapFingerPrint> = serde_json::from_str(&data).expect("BAD JSON");
         nmap_fingerprint
-    };
-}
+    });
