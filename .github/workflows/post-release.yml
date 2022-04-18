@@ -63,22 +63,22 @@ jobs:
         include:
           - build: linux
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: x86_64-unknown-linux-musl
             file: observer_ward_amd64
           - build: macos
             os: macos-latest
-            rust: stable
+            rust: nightly
             target: x86_64-apple-darwin
             file: observer_ward_darwin
           - build: macos_m1
             os: macos-latest
-            rust: stable
+            rust: nightly
             target: aarch64-apple-darwin
             file: observer_ward_aarch64_darwin
           - build: win-msvc
             os: windows-latest
-            rust: stable
+            rust: nightly
             target: i686-pc-windows-msvc
             file: observer_ward.exe
     runs-on: ${{ matrix.os }}

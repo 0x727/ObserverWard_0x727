@@ -28,8 +28,8 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        rust: [ "stable" ]
-    continue-on-error: ${{ matrix.rust != 'stable' }}
+        rust: [ "nightly" ]
+    continue-on-error: ${{ matrix.rust != 'nightly' }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -55,8 +55,8 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           # Not MSRV because its harder to jump between versions and people are
-          # more likely to have stable
-          toolchain: stable
+          # more likely to have nightly
+          toolchain: nightly
           profile: minimal
           override: true
           components: rustfmt
