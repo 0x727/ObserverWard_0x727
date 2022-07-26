@@ -241,7 +241,7 @@ async fn find_favicon_tag(
 static RE_COMPILE_BY_JUMP: Lazy<Vec<Regex>> = Lazy::new(|| -> Vec<Regex> {
     let js_reg = vec![
         r#"(?im)\.location.*?=\s*?['"](?P<name>.*?)['"]"#,
-        r#"(?im)\.location\.(open|replace)\((?P<name>.*?)\)"#,
+        r#"(?im)\.location\.(open|replace)\(['"]?(?P<name>.*?)['"]?\)"#,
     ];
     let re_list: Vec<Regex> = js_reg
         .iter()
