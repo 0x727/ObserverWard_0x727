@@ -18,7 +18,7 @@ panic = "abort"
 
 [dependencies]
 once_cell = "1.13.1"
-clap = { default-features = false, version = "3.2.19", features = ["std"] }
+clap = { default-features = false, version = "4.0.7", features = ["std"] }
 url = { version = "2.1.1", features = ["serde"] }
 csv = "1.1.6"
 dirs = "4.0.0"
