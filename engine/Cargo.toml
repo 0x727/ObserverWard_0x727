@@ -28,5 +28,5 @@ slinger = { version = "0.1.14", features = [
 md-5 = "0.10.6"
 tl = "0.7.8"
 mime = "0.3.17"
-thiserror = "1"
+thiserror = "2"
 log = "0.4.22"
